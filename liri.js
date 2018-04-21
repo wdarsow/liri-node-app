@@ -1,28 +1,33 @@
 require("dotenv").config();
 
-console.log("this is argv[0] " + process.argv[0]);
-console.log("this is argv[1] " + process.argv[1]);
-console.log("this is argv[2] " + process.argv[2]);
-// console.log("this is argv[3] " + process.argv[3]);
+const NodeTwitter = require('twitter');
+const NodeSpotify = require('node-spotify-api');
+const NodeRequest = require('request');
+const keysData = require("./keys.js");
+const fs = require("fs");
+// fs.writeFile("movies.txt", JSON.parse(tweets));
 
-//Add the code required to import the keys.js file and store it in a variable.
-// You should then be able to access your keys information like so
-let keysData = require("./keys.js");
-console.log("keys " + keysData.twitter.consumer_key);
-console.log("keys " + keysData.twitter.consumer_secret);
-console.log("keys " + keysData.twitter.access_token_key);
-console.log("keys " + keysData.twitter.access_token_secret);
+const twitterClient = new NodeTwitter ({
+    consumer_key: keysData.twitter.consumer_key,
+    consumer_secret: keysData.twitter.consumer_secret,
+    access_token_key: keysData.twitter.access_token_key,
+    access_token_secret: keysData.twitter.access_token_secret
+});
+ 
+let spotifyVar = new NodeSpotify({
+  id: keysData.spotify.id,
+  secret: keysData.spotify.secret
+});
 
-console.log("keys " + keysData.spotify.id);
-console.log("keys " + keysData.spotify.secret);
-
-// const keySpotify = new Spotify(keys.spotify);
-// const keyClient = new Twitter(keys.twitter);
-
-// console.log(keySpotify);
-// console.log(keyClient);
 
 const action = process.argv[2];
+
+let songName = "The Sign";
+
+if(process.argv[3] != null) {
+    songName = process.argv[3];
+}
+
 
 
 switch(action) {
@@ -44,11 +49,31 @@ switch(action) {
 }
 
 function tweets() {
+    let screenName = {screen_name: 'wade_node_js'};
+
+    twitterClient.get('statuses/user_timeline', screenName, function(error, tweets, response) {
+        if(error) throw error;
+
+        for(i = 0; i < 20; i++) {
+            console.log(tweets[i].text + " " + tweets[i].created_at);
+        }
+ });
     console.log("tweets function");
 }
 
 function spotify() {
-    console.log("spotify function");
+
+    spotifyVar.search({ type: 'track', query: songName, limit: 1 })
+    .then(function(response) {
+    
+    console.log("Artist Name: " + response.tracks.items[0].album.artists[0].name);
+    console.log("Song Name: " + response.tracks.items[0].name);
+    console.log("Song Preview Link: " + response.tracks.items[0].preview_url);
+    console.log("Album Name: " + response.tracks.items[0].album.name);
+  })
+  .catch(function(err) {
+    console.log(err);
+  });
 }
 
 function movie() {
@@ -58,3 +83,4 @@ function movie() {
 function doWhat() {
     console.log("do-what function");
 }
+
