@@ -4,8 +4,9 @@ const NodeTwitter = require('twitter');
 const NodeSpotify = require('node-spotify-api');
 const NodeRequest = require('request');
 const keysData = require("./keys.js");
+const Omdb = require('omdb');
+const request = require('request');
 const fs = require("fs");
-// fs.writeFile("movies.txt", JSON.parse(tweets));
 
 const twitterClient = new NodeTwitter ({
     consumer_key: keysData.twitter.consumer_key,
@@ -19,13 +20,14 @@ let spotifyVar = new NodeSpotify({
   secret: keysData.spotify.secret
 });
 
-
-const action = process.argv[2];
+let action = process.argv[2];
 
 let songName = "The Sign";
+let movieName = "Mr. Nobody";
 
 if(process.argv[3] != null) {
     songName = process.argv[3];
+    movieName = process.argv[3];
 }
 
 switch(action) {
@@ -56,7 +58,6 @@ function tweets() {
             console.log(tweets[i].text + " " + tweets[i].created_at);
         }
  });
-    console.log("tweets function");
 }
 
 function spotify() {
@@ -75,10 +76,26 @@ function spotify() {
 }
 
 function movie() {
-    console.log("movie");
+    request('http://www.omdbapi.com/?t=' + movieName + '&apikey=4b988a5c', function(error, response, body) {   
+        if(error === null && response.statusCode === 200) {
+            console.log("Movie Title: " + JSON.parse(body).Title + "\nYear: " + JSON.parse(body).Year + "\nIMDB Rating: " + JSON.parse(body).imdbRating + 
+            "\nRotten Tomatoes Rating: " + JSON.parse(body).Ratings[1].Value + "\nCountry: " + JSON.parse(body).Country + 
+            "\nLanguage: " + JSON.parse(body).Language + "\nPlot: " + JSON.parse(body).Plot + "\nActors: " + JSON.parse(body).Actors);
+        } else {
+            return console.log("error " + error);
+        }
+    });
 }
 
 function doWhat() {
-    console.log("do-what function");
+    fs.readFile('random.txt', 'utf8', (err, data) => {
+        if(err) {
+            return console.log("Error: " + err);
+        } else {
+            let doWhatArray = data.split(',')
+            process.argv[2] = doWhatArray[0];
+            songName = doWhatArray[1];
+            spotify();
+        }
+    });
 }
-
