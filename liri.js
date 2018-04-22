@@ -28,8 +28,6 @@ if(process.argv[3] != null) {
     songName = process.argv[3];
 }
 
-
-
 switch(action) {
     case "my-tweets":
         tweets();
